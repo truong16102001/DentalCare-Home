@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="/images/logo.png">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/fonts/themify-icons.css">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>Đặt lịch</title>
+  <th:block th:replace="component/javascript :: javascript"></th:block>
+  <link rel="stylesheet" href="/css/style1.css">
+  <link rel="stylesheet" href="/css/style2.css">
+  <style>
+    body {
+      background: #FFFFE0;
+      min-height: 100vh;
+      vertical-align: middle;
+      font-size: 15px;
+
+    }
+
+    .title {
+      margin-bottom: 5vh;
+    }
+
+    .card {
+      margin: auto;
+      max-width: 100%;
+      width: 90%;
+      box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      border-radius: 1rem;
+      border: transparent;
+      min-width: 95%;
+      font-weight: bold;
+    }
+
+    @media(max-width:767px) {
+      .card {
+        margin: 3vh auto;
+      }
+    }
+
+    .cart {
+      background-color: #E6E6FA	;
+      padding: 4vh 5vh;
+      border-top-left-radius: 1rem;
+      border-bottom-left-radius:  1rem;
+      float: right;
+
+    }
+
+    @media(max-width:767px) {
+      .cart {
+        padding: 4vh;
+        border-top-left-radius: 1rem;
+        border-bottom-left-radius:  1rem;
+      }
+    }
+
+    .summary {
+      background-color: #ddd;
+      border-bottom-right-radius: 1rem;
+      border-top-right-radius: 1rem;
+      padding: 4vh;
+      color: rgb(65, 65, 65);
+    }
+
+    @media(max-width:767px) {
+      .summary {
+        border-bottom-right-radius: 1rem;
+        border-top-right-radius: 1rem;
+      }
+    }
+
+    .summary .col-2 {
+      padding: 0;
+    }
+
+    .summary .col-10 {
+      padding: 0;
+    }
+
+    .row {
+      margin: 0;
+    }
+
+    .title b {
+      font-size: 1.5rem;
+    }
+
+    .main {
+      margin: 0;
+      padding: 2vh 0;
+      width: 100%;
+    }
+
+    .col-2,
+    .col {
+      padding: 0 1vh;
+    }
+
+    a {
+      padding: 0 1vh;
+    }
+
+    .back-to-shop {
+      margin-top: 4.5rem;
+    }
+
+    h5 {
+      margin-top: 4vh;
+    }
+
+    hr {
+      margin-top: 1.25rem;
+    }
+
+    form {
+      padding: 2vh 0;
+    }
+
+    select {
+      border: 1px solid rgba(0, 0, 0, 0.137);
+      padding: 1.5vh 1vh;
+      margin-bottom: 4vh;
+      outline: none;
+      width: 100%;
+      background-color: rgb(247, 247, 247);
+    }
+
+    .input-name input {
+      border: 1px solid rgba(0, 0, 0, 0.137);
+      padding: 1vh;
+      margin-bottom: 4vh;
+      outline: none;
+      width: 100%;
+      background-color: rgb(247, 247, 247);
+    }
+
+    input:focus::-webkit-input-placeholder {
+      color: transparent;
+    }
+    .style-btn .btn {
+      background-color: #000;
+      border-color: #000;
+      color: white;
+      width: 100%;
+      font-size: 0.7rem;
+      margin-top: 4vh;
+      padding: 1vh;
+      border-radius: 0;
+    }
+
+    .btn:focus {
+      box-shadow: none;
+      outline: none;
+      box-shadow: none;
+      color: white;
+      -webkit-box-shadow: none;
+      -webkit-user-select: none;
+      transition: none;
+    }
+
+    .btn:hover {
+      color: white;
+    }
+
+    a {
+      color: black;
+    }
+
+    a:hover {
+      color: black;
+      text-decoration: none;
+    }
+
+    .payment-method__item-icon-wrapper img {
+      min-width: 100px;
+      max-height: 100px;
+      max-width: 100px;
+      padding-left: 40px;
+      image-rendering: -webkit-optimize-contrast;
+    }
+    .scBar{
+      height: 600px;
+      overflow: scroll;
+    }
+  </style>
+
+</head>
+<body>
+<th:block th:replace="component/header :: header"></th:block>
+<th:block th:replace="component/account :: account"></th:block>
+
+<div class="card" style="margin-top: 10%; margin-bottom: 5%">
+  <div class="row">
+
+    <!-- ORDER FORM SECTION -->
+    <div class="col-md-6 style-btn summary">
+      <form class="input-name" th:action="@{/service-booking}" method="post">
+        <div class="row">
+          <h4 class="cal"><b>Thông tin khách hàng đã nhập</b></h4>
+        </div>
+        <hr>
+        <input type="hidden" name="step" th:value="2">
+
+        <label for="fullname">Họ Tên</label>
+        <input id="fullname" type="text" name="fullName" th:value="${bookingInfo.fullName}" required readonly>
+
+        <label for="email">EMAIL</label>
+        <input id="email" type="text" name="email" th:value="${bookingInfo.email}" required readonly>
+
+        <label for="phone">SỐ ĐIỆN THOẠI</label>
+        <input id="phone" type="text" name="phone" th:value="${bookingInfo.phone}" required readonly>
+
+        <label for="address">ĐỊA CHỈ</label>
+        <input id="address" type="text" name="address" th:value="${bookingInfo.address}" required readonly>
+
+        <label for="note">GHI CHÚ</label>
+        <textarea id="note" class="form-control" name="note" rows="3" th:text="${bookingInfo.note}" required></textarea>
+
+        <div class="back-to-shop text-muted">
+          <a th:href="@{/service-booking(id=${session.service.serviceId}, step=1, fullName=bookingInfo.fullName, email=bookingInfo.email, phone=bookingInfo.phone, address=bookingInfo.address, note=bookingInfo.note)}">&leftarrow; Trở lại</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- CART SECTION -->
+    <div class="col-md-6 cart">
+      <div class="title">
+        <div class="row">
+          <div class="col">
+            <h4><b>Dịch vụ</b></h4>
+          </div>
+        </div>
+      </div>
+      <div class="scBar">
+        <div class="row main align-items-center">
+          <div class="col-2">
+            <img class="img-fluid" th:src="${session.service.serviceImages[0].image.imageUrl}">
+          </div>
+          <div class="col">
+            <div class="row" th:text="${session.service.serviceName}"></div>
+          </div>
+          <div class="col" style="text-align: center;" th:text="${session.service.price + '₫'}"></div>
+        </div>
+
+        <label for="bookingDate">Ngày khám</label>
+        <input type="date" id="bookingDate" name="bookingDate" required
+               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+
+        <label for="timeSlot">Khung giờ</label>
+        <select name="timeSlot" id="timeSlot" required>
+          <option value="" disabled selected>-- Chọn khung giờ --</option>
+          <th:block th:each="slot : ${slots}">
+            <option th:value="${#strings.concat(#temporals.format(slot.startTime, 'HH:mm'), '-', #temporals.format(slot.endTime, 'HH:mm'))}"
+                    th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">
+            </option>
+          </th:block>
+        </select>
+      </div>
+
+      <div class="back-to-shop text-muted">
+        <a th:href="@{/service}">&leftarrow; Trở lại</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Optional Footer -->
+<th:block th:replace="component/footer :: footer"></th:block>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

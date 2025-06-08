@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="./images/lg.jpg">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/css/style1.css">
+  <link rel="stylesheet" href="/css/style2.css">
+  <link rel="stylesheet" href="/assets/fonts/themify-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <th:block th:replace="component/javascript :: javascript"></th:block>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <title>Service Details</title>
+  <style>
+    li.nav-item a.active {
+      color: blue;
+      font-weight: bold;
+    }
+    li.nav-item a {
+      color: black;
+    }
+  </style>
+</head>
+<body>
+<!-- Thymeleaf include fragments -->
+<th:block th:replace="component/header :: header"></th:block>
+<th:block th:replace="component/account :: account"></th:block>
+
+<!-- Product section-->
+<section class="py-5">
+  <div class="container px-4 px-lg-5 my-5">
+    <div class="row gx-4 gx-lg-5 align-items-center">
+      <div style="width: 450px; height: 450px; background-color: white;" id="carouselExampleControls"
+           class="carousel slide col-md-5" data-bs-ride="carousel">
+        <div class="carousel-inner" style="width: 100%; height: 100%;">
+          <div class="image-zoom carousel-item active">
+            <img id="imgProduct" class="d-block w-100"
+                 th:src="@{${service.serviceImages[0].image.imageUrl}}"
+                 alt="First slide">
+          </div>
+          <div class="image-zoom carousel-item"
+               th:each="img, iterStat : ${service.serviceImages}"
+               th:if="${iterStat.index > 0}"
+               style="width: 100%; height: 100%;">
+            <img class="d-block w-100"
+                 th:src="@{${img.imageUrl}}"
+                 style="width: 100%; height: 100%;" alt="...">
+          </div>
+        </div>
+        <a style="background-color: #F0F0F0; height: 50px; width: 50px;"
+           class="carousel-control-prev" href="#carouselExampleControls" role="button" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </a>
+        <a style="background-color: #F0F0F0; height: 50px; width: 50px;"
+           class="carousel-control-next" href="#carouselExampleControls" role="button" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </a>
+      </div>
+
+      <div class="col-md-7">
+          <h1 th:text="${service.serviceName}"></h1>
+          <div class="group-status">
+                            <span class="first_status">
+                                <span class="a_name">Tình trạng:</span>
+                                <span class="status_name availabel">
+                                    <i style="color:blue;"
+                                       th:text="${service.isActive  ? 'Có sẵn' : 'Không có sẵn'}"></i>
+                                </span>
+                            </span>
+          </div>
+          <div class="fs-5 mb-4">
+            <div style="margin-bottom: 1.7%">
+              Giá: <span th:text="${service.price} + ' VND'"></span>
+            </div>
+          </div>
+          <h6 class="mt-5">Mô tả: </h6>
+          <div class="mb-5" th:text="${service.description}"></div>
+
+          <div class="row">
+            <!-- User not logged in -->
+            <div class="col-lg-6" th:if="${(session.us == null) or (session.us != null and session.us.role.roleId == 5)}">
+              <a class="btn btn-outline-danger" th:href="@{/service-booking(id=${service.serviceId}, step=1)}" style="font-size: 20px">
+                Đặt lịch
+              </a>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Related product section-->
+<hr class="marketing_feedback_margin">
+<section class="py-5 bg-light">
+  <div class="container px-4 px-lg-5 mt-5">
+    <h2 class="ms-2 mb-4">Dịch vụ liên quan</h2>
+    <div class="related-products-slider row justify-content-center">
+      <div class="card col ms-2 mb-4" th:each="p : ${relatedServices}"
+           style="background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
+        <img class="card-img-top mt-1" style="height: 200px;" th:src="@{${p.serviceImages[0].image.imageUrl}}" alt="..." />
+        <div class="card-body">
+          <div class="text-center">
+            <h5 class="fw-bolder" th:text="${p.serviceName}"></h5>
+            <div>
+              Giá: <span style="color: red" th:text="${p.price} + 'đ'"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+          <div class="text-center">
+            <a class="btn btn-outline-success mt-auto"
+               th:href="@{/service-details(id=${p.serviceId})}">Xem chi tiết</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer fragment -->
+<th:block th:replace="component/footer :: footer"></th:block>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+<script>
+  const myInput = document.getElementById("my-input");
+  function stepper(btn) {
+    let id = btn.getAttribute("id");
+    let min = myInput.getAttribute("min");
+    let max = myInput.getAttribute("max");
+    let step = myInput.getAttribute("step");
+    let val = myInput.getAttribute("value");
+    let calcStep = (id === "increment") ? (step * 1) : (step * -1);
+    let newValue = parseInt(val) + calcStep;
+    if (newValue >= min && newValue <= max) {
+      myInput.setAttribute("value", newValue);
+    }
+  }
+
+  $(document).ready(function () {
+    $('.related-products-slider').slick({
+      dots: true,
+      infinite: true,
+      speed: 300,
+      slidesToShow: 3,
+      slidesToScroll: 3,
+      autoplay: true,
+      autoplaySpeed: 3000
+    });
+  });
+
+  $(document).ready(function () {
+    $('.rating i').click(function () {
+      $('.rating i').removeClass('active');
+      $(this).addClass('active');
+      $(this).prevAll().addClass('active');
+      $('#selected-rating').val($(this).attr('data-rating'));
+    });
+  });
+
+  document.querySelectorAll(".carousel-item img").forEach(function (img) {
+    img.addEventListener("mousemove", function (event) {
+      var x = event.offsetX;
+      var y = event.offsetY;
+      img.style.transformOrigin = x + "px " + y + "px";
+    });
+  });
+</script>
+</body>
+
+</html>

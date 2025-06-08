@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" th:href="'../static/images/logo.png'">
+    <title>Detal Care</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/fonts/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/1.0.1/css/themify-icons.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Include JavaScript component -->
+    <th:block th:replace="component/javascript :: javascript"></th:block>
+    <style>
+        .swiper-container {
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .swiper-wrapper {
+            display: flex;
+        }
+
+        .swiper-slide {
+            flex-shrink: 0;
+            width: 100%; /* Đảm bảo mỗi slide chiếm trọn chiều rộng container */
+            box-sizing: border-box;
+        }
+
+    </style>
+    <style>
+        .labels {
+          font-size: 14px;
+          font-weight: bold;
+          color: #333;
+        }
+        li.nav-item a.active{
+            color: blue;
+            font-weight: bold;
+        }
+        li.nav-item a{
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Include Header -->
+<th:block th:replace="component/header :: header"></th:block>
+
+<!-- Include Account -->
+<th:block th:replace="component/account :: account"></th:block>
+
+<!-- Feature Section -->
+<div class="features" style="background-color: #ffffff; margin-top: 20px; padding: 60px 0; display: flex; justify-content: space-around; text-align: center;">
+    <div style="width: 250px;">
+        <i class="fa fa-user-md" style="font-size: 40px; color: #0b74de;"></i>
+        <h3>Bác sĩ chuyên môn</h3>
+        <p>Đội ngũ bác sĩ giỏi, tận tâm, nhiều năm kinh nghiệm trong lĩnh vực nha khoa.</p>
+    </div>
+    <div style="width: 250px;">
+        <i class="fa fa-stethoscope" style="font-size: 40px; color: #0b74de;"></i>
+        <h3>Thiết bị hiện đại</h3>
+        <p>Trang thiết bị tiên tiến, đạt chuẩn quốc tế, đảm bảo an toàn và hiệu quả.</p>
+    </div>
+    <div style="width: 250px;">
+        <i class="fa fa-calendar-check-o" style="font-size: 40px; color: #0b74de;"></i>
+        <h3>Đặt lịch linh hoạt</h3>
+        <p>Hệ thống đặt lịch online 24/7 giúp bạn dễ dàng lựa chọn thời gian phù hợp.</p>
+    </div>
+</div>
+
+<!-- Testimonial Section -->
+<div class="testimonials" style="background-color: #f0f8ff; padding: 60px 20px; text-align: center;">
+    <h2 style="color: #0b74de;">Khách hàng nói gì về chúng tôi</h2>
+    <div class="swiper-container" style="max-width: 800px; margin: 40px auto; overflow: hidden;">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <div style="text-align: center; padding: 20px;">
+                    <img src="/images/customer1.jpg" alt="Nguyễn Thị Lan" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+                    <p>"Phòng khám sạch sẽ, bác sĩ nhẹ nhàng, tận tâm. Tôi rất hài lòng."</p>
+                    <strong>- Nguyễn Thị Lan</strong>
+                </div>
+            </div>
+            <div class="swiper-slide">
+                <div style="text-align: center; padding: 20px;">
+                    <img src="/images/customer2.jpg" alt="Trần Văn Minh" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+                    <p>"Tôi đặt lịch online rất nhanh chóng. Không cần chờ đợi lâu."</p>
+                    <strong>- Trần Văn Minh</strong>
+                </div>
+            </div>
+            <div class="swiper-slide">
+                <div style="text-align: center; padding: 20px;">
+                    <img src="/images/customer3.jpg" alt="Phạm Hữu Đức" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+                    <p>"Thiết bị hiện đại, khám chữa răng không đau và rất an tâm."</p>
+                    <strong>- Phạm Hữu Đức</strong>
+                </div>
+            </div>
+            <div class="swiper-slide">
+                <div style="text-align: center; padding: 20px;">
+                    <img src="/images/avtdefault.png" alt="Lê Thị Hồng" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+                    <p>"Nhân viên thân thiện, tư vấn rõ ràng, chi phí hợp lý."</p>
+                    <strong>- Lê Thị Hồng</strong>
+                </div>
+            </div>
+            <div class="swiper-slide">
+                <div style="text-align: center; padding: 20px;">
+                    <img src="/images/avtdefault.png" alt="Đỗ Văn Bình" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+                    <p>"Trải nghiệm tuyệt vời, sẽ giới thiệu cho bạn bè và người thân."</p>
+                    <strong>- Đỗ Văn Bình</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="cta" style="background-color: #0b74de; color: white; padding: 50px 20px; text-align: center;">
+    <h2>Đặt lịch khám ngay hôm nay!</h2>
+    <p style="margin-bottom: 20px;">Hãy để chúng tôi chăm sóc sức khỏe răng miệng cho bạn và gia đình.</p>
+    <a href="/booking" style="background-color: white; color: #0b74de; padding: 15px 30px; border-radius: 5px; text-decoration: none; font-weight: bold;">Đặt lịch ngay</a>
+</div>
+
+<!-- Include Footer -->
+<th:block th:replace="component/footer :: footer"></th:block>
+
+<script>
+    if (document.querySelector('.alert')) {
+        document.querySelectorAll('.alert').forEach(function ($el) {
+            setTimeout(() => {
+                $el.classList.remove('show');
+            }, 3000);
+        });
+    }
+</script>
+<script>
+    var swiper = new Swiper('.swiper-container', {
+        loop: true,
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        }
+    });
+
+</script>
+
+</body>
+</html>

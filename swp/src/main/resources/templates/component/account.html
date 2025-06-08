@@ -1,0 +1,286 @@
+<div th:fragment="account" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<!-- Notification User -->
+<div th:if="${notification != null}"
+     th:classappend="${#strings.contains(notification.toLowerCase(), 'thành công')} ? 'alert alert-success' : 'alert alert-danger'"
+     class="alert alert-dismissible fade show"
+     role="alert"
+     style="position: fixed; z-index: 15; margin-left: 80%; margin-top: 5%;">
+  <strong th:text="${notification}"></strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<!-- User Profile Modal -->
+<div class="modal fade col-md-12" id="userProfileModal" tabindex="-1" role="dialog" style="padding-right: 18px;" th:if="${session.us != null}">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 10px; margin-top: 10px; min-width: 1150px; margin-left: -320px;">
+      <div class="modal-header">
+        <h2 style="text-align:center; font-family: Arial"><b style="padding-left: 400px;">Thông tin cá nhân</b></h2>
+      </div>
+      <div class="modal-body">
+        <section>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                  <img class="rounded-circle mt-5" width="150px" height="150px"
+                       th:src="${session.us.avatar != null and session.us.avatar != ''} ? ${session.us.avatar} : '/images/avatar/avtdefault.png'" />
+                  <span class="font-weight-bold" th:text="${session.us.fullName}"></span>
+                  <span class="text-black-50" th:text="${session.us.email}"></span>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="p-3 py-5">
+                  <form th:action="@{/editprofile}" method="post" enctype="multipart/form-data" name="editProfileForm" onsubmit="return validateFormEditProfile()">
+                    <div class="row mt-4">
+                      <div class="col-md-6">
+                        <label class="labels">Họ và tên<b class="ic">*</b></label>
+                        <input type="text" class="form-control" name="fullName" placeholder="Họ và tên" th:value="${session.us.fullName}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Ngày sinh<b class="ic">*</b></label>
+                        <input type="date" class="form-control" id="dobEditProfile" name="dob" placeholder="Ngày sinh" th:value="${session.us.dob}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Số điện thoại<b class="ic">*</b></label>
+                        <input type="text" class="form-control" name="phone" placeholder="Số điện thoại" th:value="${session.us.phoneNumber}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Địa chỉ<b class="ic">*</b></label>
+                        <input type="text" class="form-control" name="address" placeholder="Địa chỉ" th:value="${session.us.address}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Email<b class="ic">*</b></label>
+                        <input type="text" class="form-control" name="email" placeholder="Email" th:value="${session.us.email}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Ảnh đại diện<b class="ic">*</b></label>
+                        <input type="file" class="form-control" accept="image/*" name="avatar">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="labels">Giới tính<b class="ic">*</b></label>
+                        <div>
+                          <label><input name="gender" type="radio" value="Male" th:checked="${session.us.gender == 'Male'}"> Nam</label>&nbsp;&nbsp;&nbsp;
+                          <label><input name="gender" type="radio" value="Female" th:checked="${session.us.gender == 'Female'}"> Nữ</label>
+                          <label><input name="gender" type="radio" value="Other" th:checked="${session.us.gender == 'Other'}"> Other</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6" th:if="${session.us.password != null && session.us.password.length() > 0}">
+                        <label class="labels">Mật khẩu</label>
+                        <button type="button" data-bs-toggle="modal" data-bs-dismiss="modal" data-bs-target="#ChangePasswordModal" class="btn btn-dark">Đổi mật khẩu</button>
+                      </div>
+                      </div>
+                    <input type="hidden" name="password" th:value="${session.us.password}" />
+                    <input type="hidden" name="userId" th:value="${session.us.userId}" />
+                    <div class="row mt-5 col-md-6 text-center">
+                      <button class="btn btn-dark" type="submit">Lưu</button>
+                    </div>
+                  </form>
+                  <div class="row mt-5 col-md-6 text-center d-flex">
+                    <a type="button" th:href="@{/home}" class="btn" style="padding-left: 150px;">Quay về trang chủ</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--changepassword-->
+<div class="modal fade col-md-12" role="dialog" id="ChangePasswordModal" th:if="${session.us != null}">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 10px; margin-top: 150px;">
+      <div class="modal-header">
+        <h1 style="text-align: center ; margin-left: 50px;">Thay đổi mật khẩu</h1>
+      </div>
+      <div class="modal-body">
+        <form th:action="@{/changepassword}" method="post" name="changePasswordForm" onsubmit="return validateChangePasswordForm()">
+          <input type="hidden" name="userId" th:value="${session.us.userId}"/>
+
+          <b>Mật khẩu cũ<b class="ic">*</b></b>&nbsp;&nbsp;
+          <div class="form-group">
+            <input name="old_pass" type="password" class="form-control" placeholder="Mật khẩu cũ" style="border-radius: 100px;" required>
+          </div>
+
+          <b>Mật khẩu mới<b class="ic">*</b></b>&nbsp;&nbsp;
+          <div class="form-group">
+            <input name="new_pass1" type="password" class="form-control" placeholder="Mật khẩu mới" style="border-radius: 100px;" required>
+          </div>
+
+          <b>Nhập lại mật khẩu mới<b class="ic">*</b></b>&nbsp;&nbsp;
+          <div class="form-group">
+            <input name="new_pass2" type="password" class="form-control" placeholder="Nhập lại mật khẩu mới" style="border-radius: 100px;" required>
+          </div>
+
+          <br>
+          <center>
+            <button type="submit" class="btn btn-dark" style="padding-right: 160px;padding-left: 160px; border-radius: 100px;">
+              Cập nhập mật khẩu
+            </button>
+          </center>
+        </form>
+        <br><br>
+        <a type="button" data-bs-toggle="modal" data-bs-dismiss="modal" data-bs-target="#userProfileModal"
+           style="padding-left: 190px; text-decoration: none; border-radius: 100px;">Quay lại </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  if (document.querySelector('.alert')) {
+    document.querySelectorAll('.alert').forEach(function ($el) {
+      setTimeout(() => {
+        $el.classList.remove('show');
+      }, 3000);
+    });
+  }
+</script>
+
+<script>
+
+  function validateFormRegister() {
+
+    // Lấy giá trị của các trường input
+    const name = document.forms["registerForm"]["fullName"].value.trim();
+    const email = document.forms["registerForm"]["email"].value.trim();
+    const phone = document.forms["registerForm"]["phone"].value.trim();
+    const password = document.forms["registerForm"]["password"].value.trim();
+    const repassword = document.forms["registerForm"]["repassword"].value.trim();
+    const address = document.forms["registerForm"]["address"].value.trim();
+    const dob = document.forms["registerForm"]["dob"].value.trim();
+
+    // Kiểm tra độ dài của tên
+    if (name.length < 8 || name.trim().length > 32) {
+      alert("Vui lòng nhập tên có độ dài từ 8 đến 32 ký tự");
+
+      return false;
+    }
+
+    // Kiểm tra định dạng email
+    const emailRegex = /^[a-zA-Z][a-zA-Z0-9]*@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      alert("Vui lòng nhập email hợp lệ");
+      return false;
+    }
+
+    // Kiểm tra định dạng số điện thoại
+    const phoneRegex = /^0\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      alert("Vui lòng nhập số điện thoại hợp lệ");
+      return false;
+    }
+
+
+
+    if (password.length < 8 || password.length > 32) {
+      alert("Vui lòng nhập mật khẩu có độ dài từ 8 đến 32 ký tự");
+      return false;
+    }
+
+    if (password !== repassword) {
+      alert("Nhập lại mật khẩu không đúng. Hãy kiểm tra lại");
+      return false;
+    }
+
+    if (address.length < 1) {
+      alert("Độ dài address không hợp lệ. Hãy nhập lại!");
+      return false;
+    }
+       if (!dob) {
+    alert("Vui lòng nhập ngày sinh");
+    return false;
+  }
+
+  const inputDob = new Date(dob);
+  const now = new Date();
+
+  // Lấy ngày hiện tại trừ đi 3 năm
+  const minDob = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate());
+
+  if (inputDob > minDob) {
+    alert("Ngày sinh phải cách ngày hiện tại ít nhất 3 năm");
+    return false;
+  }
+    return true;
+  }
+    // Nếu không có lỗi, cho phép submit form
+    return true;
+  }
+</script>
+
+<script>
+  function validateChangePasswordForm() {
+    const oldPassword = document.forms["changePasswordForm"]["old_pass"].value.trim();
+    const newPassword1 = document.forms["changePasswordForm"]["new_pass1"].value.trim();
+    const newPassword2 = document.forms["changePasswordForm"]["new_pass2"].value.trim();
+    if ((oldPassword.length < 8 || oldPassword.length > 32)) {
+      alert("Mật khẩu cũ có độ dài từ 8 đến 32 ký tự");
+      return false;
+    }
+    if ((newPassword1.length < 8 || newPassword1.length > 32)) {
+      alert("Vui lòng nhập mật khẩu mới có độ dài từ 8 đến 32 ký tự");
+      return false;
+    }
+    if (newPassword1 !== newPassword2) {
+      alert("Nhập lại mật khẩu không đúng. Hãy kiểm tra lại");
+      return false;
+    }
+    return true;
+  }
+
+</script>
+
+<script>
+  function validateFormEditProfile() {
+    const name = document.forms["editProfileForm"]["fullName"].value.trim();
+    const email = document.forms["editProfileForm"]["email"].value.trim();
+    const phone = document.forms["editProfileForm"]["phone"].value.trim();
+    const address = document.forms["editProfileForm"]["address"].value.trim();
+    const dob = document.getElementById("dobEditProfile").value.trim();
+    if (name.length < 8 || namename.length > 32) {
+      alert("Tên phải từ 8-32 ký tự");
+      return false;
+    }
+
+    const regexEmail = /^[a-zA-Z][a-zA-Z0-9]*@[a-zA-z]+\.[a-zA-Z]{2,}$/;
+    if (!regexEmail.test(email)) {
+      alert("Vui lòng email hợp lệ");
+
+      return false;
+    }
+
+    const regexPhone = /^0\d{9}$/;
+    if (!regexPhone.test(phone)) {
+      alert("Vui lòng nhập số điện thoại hợp lệ");
+      return false;
+    }
+
+    if (address.length <= 0) {
+      alert("Vui lòng nhập địa chỉ hợp lệ");
+      return false;
+    }
+
+    if (!dob) {
+      alert("Vui lòng nhập ngày sinh");
+      return false;
+    }
+
+    const inputDob = new Date(dob);
+    const now = new Date();
+
+    // Lấy ngày hiện tại trừ đi 3 năm
+    const minDob = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate());
+
+    if (inputDob > minDob) {
+      alert("Ngày sinh phải cách ngày hiện tại ít nhất 3 năm");
+      return false;
+    }
+    return true;
+  }
+</script>
+</div>
