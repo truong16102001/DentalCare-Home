@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo Phiên Khám</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            margin-top: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            border-bottom: none;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .card-footer {
+            background-color: #f8f9fa;
+            padding: 15px 30px;
+        }
+
+        h4, h5 {
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .form-select {
+            height: 45px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            font-size: 16px;
+        }
+
+        .btn-submit {
+            margin-top: 25px;
+            width: 100%;
+            background-color: #28a745;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Tạo Phiên Khám</h3>
+        </div>
+        <div class="card-body">
+
+            <!-- Nếu workingScheduleList KHÔNG RỖNG -->
+            <div th:if="${workingScheduleList != null and !workingScheduleList.isEmpty()}">
+                <div class="mb-4">
+                    <h4>Thông tin lịch hẹn</h4>
+                    <p><strong>Họ tên:</strong> <span th:text="${booking.patientName}"></span></p>
+                    <p><strong>Ngày sinh:</strong> <span th:text="${booking.dob}"></span></p>
+                    <p><strong>Ca khám:</strong>
+                        <span th:text="${booking.appointmentDate}"></span> __
+                        <span th:text="${#temporals.format(booking.slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.slot.endTime, 'HH:mm')}"></span>
+                    </p>
+                    <p><strong>Dịch vụ:</strong>
+                        <span th:text="${booking.service.serviceId + '-' + booking.service.serviceName}"></span>
+                    </p>
+                </div>
+
+                <form th:action="@{/create-session}" method="post">
+                    <input type="hidden" name="bookingId" th:value="${booking.bookingId}" />
+                    <div class="mb-3">
+                        <label for="scheduleId" class="form-label"><strong>Chọn bác sĩ và phòng</strong></label>
+                        <select id="scheduleId" name="scheduleId" class="form-select" required>
+                            <option value="">-- Chọn bác sĩ và phòng --</option>
+                            <option th:each="ws : ${workingScheduleList}"
+                                    th:value="${ws.scheduleId}"
+                                    th:text="${ws.employee.userId + ' - ' + ws.employee.fullName
+                                        + ' | ' + ws.room.roomId + ' - ' + ws.room.roomName
+                                        + ' | ' + ws.shift.description}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-submit">Tạo Phiên Khám</button>
+                </form>
+            </div>
+
+            <!-- Nếu workingScheduleList RỖNG hoặc NULL -->
+            <div th:unless="${workingScheduleList != null and !workingScheduleList.isEmpty()}">
+                <div class="alert alert-warning">
+                    <p style="color: red">
+                        Hiện tại ca
+                        <span th:text="${#temporals.format(booking.slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.slot.endTime, 'HH:mm')}"></span>
+                        chưa có người trực. Hãy phân công bác sĩ để tiếp tục tạo ca khám.
+                    </p>
+                </div>
+                <div class="card-footer text-end">
+                    <a th:href="@{/work-assignment(assignDate=${booking.appointmentDate})}" class="btn btn-secondary">
+                        Phân công bác sĩ
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer text-end">
+            <a th:href="@{/manage-booking}" class="btn btn-secondary">← Trở về</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

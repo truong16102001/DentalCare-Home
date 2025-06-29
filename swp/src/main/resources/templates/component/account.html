@@ -11,7 +11,7 @@
 </div>
 
 <!-- User Profile Modal -->
-<div class="modal fade col-md-12" id="userProfileModal" tabindex="-1" role="dialog" style="padding-right: 18px;" th:if="${session.us != null}">
+<div class="modal fade col-md-12" id="userProfileModal" tabindex="-1" role="dialog" style="padding-right: 18px;" th:if="${session.userId != null}">
   <div class="modal-dialog">
     <div class="modal-content" style="border-radius: 10px; margin-top: 10px; min-width: 1150px; margin-left: -320px;">
       <div class="modal-header">
@@ -24,9 +24,9 @@
               <div class="col-md-4">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
                   <img class="rounded-circle mt-5" width="150px" height="150px"
-                       th:src="${session.us.avatar != null and session.us.avatar != ''} ? ${session.us.avatar} : '/images/avatar/avtdefault.png'" />
-                  <span class="font-weight-bold" th:text="${session.us.fullName}"></span>
-                  <span class="text-black-50" th:text="${session.us.email}"></span>
+                       th:src="${session.avatar != null and session.avatar != ''} ? ${session.avatar} : '/images/avatar/avtdefault.png'" />
+                  <span class="font-weight-bold" th:text="${session.fullName}"></span>
+                  <span class="text-black-50" th:text="${session.email}"></span>
                 </div>
               </div>
               <div class="col-md-8">
@@ -35,23 +35,23 @@
                     <div class="row mt-4">
                       <div class="col-md-6">
                         <label class="labels">Họ và tên<b class="ic">*</b></label>
-                        <input type="text" class="form-control" name="fullName" placeholder="Họ và tên" th:value="${session.us.fullName}">
+                        <input type="text" class="form-control" name="fullName" placeholder="Họ và tên" th:value="${session.fullName}">
                       </div>
                       <div class="col-md-6">
                         <label class="labels">Ngày sinh<b class="ic">*</b></label>
-                        <input type="date" class="form-control" id="dobEditProfile" name="dob" placeholder="Ngày sinh" th:value="${session.us.dob}">
+                        <input type="date" class="form-control" id="dobEditProfile" name="dob" placeholder="Ngày sinh" th:value="${session.dob}">
                       </div>
                       <div class="col-md-6">
                         <label class="labels">Số điện thoại<b class="ic">*</b></label>
-                        <input type="text" class="form-control" name="phone" placeholder="Số điện thoại" th:value="${session.us.phoneNumber}">
+                        <input type="text" class="form-control" name="phone" placeholder="Số điện thoại" th:value="${session.phoneNumber}">
                       </div>
                       <div class="col-md-6">
                         <label class="labels">Địa chỉ<b class="ic">*</b></label>
-                        <input type="text" class="form-control" name="address" placeholder="Địa chỉ" th:value="${session.us.address}">
+                        <input type="text" class="form-control" name="address" placeholder="Địa chỉ" th:value="${session.address}">
                       </div>
                       <div class="col-md-6">
                         <label class="labels">Email<b class="ic">*</b></label>
-                        <input type="text" class="form-control" name="email" placeholder="Email" th:value="${session.us.email}">
+                        <input type="text" class="form-control" name="email" placeholder="Email" th:value="${session.email}">
                       </div>
                       <div class="col-md-6">
                         <label class="labels">Ảnh đại diện<b class="ic">*</b></label>
@@ -60,18 +60,18 @@
                       <div class="col-md-6">
                         <label class="labels">Giới tính<b class="ic">*</b></label>
                         <div>
-                          <label><input name="gender" type="radio" value="Male" th:checked="${session.us.gender == 'Male'}"> Nam</label>&nbsp;&nbsp;&nbsp;
-                          <label><input name="gender" type="radio" value="Female" th:checked="${session.us.gender == 'Female'}"> Nữ</label>
-                          <label><input name="gender" type="radio" value="Other" th:checked="${session.us.gender == 'Other'}"> Other</label>
+                          <label><input name="gender" type="radio" value="Male" th:checked="${session.gender == 'Male'}"> Nam</label>&nbsp;&nbsp;&nbsp;
+                          <label><input name="gender" type="radio" value="Female" th:checked="${session.gender == 'Female'}"> Nữ</label>
+                          <label><input name="gender" type="radio" value="Other" th:checked="${session.gender == 'Other'}"> Other</label>
                         </div>
                       </div>
-                      <div class="col-md-6" th:if="${session.us.password != null && session.us.password.length() > 0}">
+                      <div class="col-md-6" th:if="${session.password != null && session.password.length() > 0}">
                         <label class="labels">Mật khẩu</label>
                         <button type="button" data-bs-toggle="modal" data-bs-dismiss="modal" data-bs-target="#ChangePasswordModal" class="btn btn-dark">Đổi mật khẩu</button>
                       </div>
                       </div>
-                    <input type="hidden" name="password" th:value="${session.us.password}" />
-                    <input type="hidden" name="userId" th:value="${session.us.userId}" />
+                    <input type="hidden" name="password" th:value="${session.password}" />
+                    <input type="hidden" name="userId" th:value="${session.userId}" />
                     <div class="row mt-5 col-md-6 text-center">
                       <button class="btn btn-dark" type="submit">Lưu</button>
                     </div>
@@ -90,7 +90,7 @@
 </div>
 
 <!--changepassword-->
-<div class="modal fade col-md-12" role="dialog" id="ChangePasswordModal" th:if="${session.us != null}">
+<div class="modal fade col-md-12" role="dialog" id="ChangePasswordModal" th:if="${session.userId != null}">
   <div class="modal-dialog">
     <div class="modal-content" style="border-radius: 10px; margin-top: 150px;">
       <div class="modal-header">
@@ -98,7 +98,7 @@
       </div>
       <div class="modal-body">
         <form th:action="@{/changepassword}" method="post" name="changePasswordForm" onsubmit="return validateChangePasswordForm()">
-          <input type="hidden" name="userId" th:value="${session.us.userId}"/>
+          <input type="hidden" name="userId" th:value="${session.userId}"/>
 
           <b>Mật khẩu cũ<b class="ic">*</b></b>&nbsp;&nbsp;
           <div class="form-group">

@@ -1,7 +1,9 @@
 package com.example.swp.entity;
-
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -9,8 +11,6 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Entity
 @Builder
 @Table(name = "Users")
@@ -22,13 +22,13 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true)
     private String phoneNumber;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 50)
+    @Column(length = 200)
     private String fullName;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -45,7 +45,7 @@ public class User {
     @Column(length = 200)
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roleID")
     private Role role;
 

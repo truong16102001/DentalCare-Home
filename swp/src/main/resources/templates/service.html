@@ -129,7 +129,7 @@
                          alt="" style="height: 250px; width: 250px;">
                   </a>
 
-                  <a th:if="${session.us == null or (session.us != null and session.us.role == '5')}"
+                  <a th:if="${session.userId == null or session.roleId == 5}"
                      style="cursor: pointer;"
                      class="buy-now"
                     th:href="@{/service-booking(id=${p.serviceId},step=1)}">Đặt lịch</a>

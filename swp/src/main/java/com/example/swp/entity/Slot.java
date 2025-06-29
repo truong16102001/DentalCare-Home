@@ -1,5 +1,6 @@
 package com.example.swp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,11 @@ public class Slot {
     private LocalTime startTime;
 
     private LocalTime endTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    @JsonManagedReference
+    private Shift shift;
 
     private Boolean isActive;
 }

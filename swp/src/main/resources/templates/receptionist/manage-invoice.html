@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/logo.png}">
+  <title>Invoice management</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+  <link rel="stylesheet" th:href="@{/assets/fonts/themify-icons/themify-icons.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/1.0.1/css/themify-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style1.css}">
+  <link rel="stylesheet" th:href="@{/css/style2.css}">
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+
+  <!-- Include JavaScript component -->
+  <th:block th:replace="component/javascript :: javascript"></th:block>
+
+  <style>
+    li.nav-item a.active{
+        color: red;
+        font-weight: bold;
+    }
+    li.nav-item a{
+        color: black;
+    }
+    .form-select option{
+        background-color: transparent;
+    }
+
+    .input-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .input-container input[type="text"] {
+        padding-right: 30px;
+    }
+
+    .clear-icon {
+        position: absolute;
+        top: 50%;
+        color: red;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        display: none;
+    }
+
+    .input-container:hover .clear-icon {
+        display: block;
+    }
+
+    .product-item {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgb(0 0 0);
+        text-align: center;
+    }
+
+    .product-thumb {
+        width: 180px;
+        height: 250px;
+    }
+
+    .product-name {
+        /* You can adjust the font size as needed */
+        font-size: 14px;
+        /* You can add additional styles if needed */
+    }
+  </style>
+</head>
+<body>
+<div id="main">
+  <!-- Header -->
+  <th:block th:replace="component/header :: header"></th:block>
+  <div class="container-fluid" style="margin-top: 100px">
+    <div th:if="${notification != null}"
+         th:classappend="${#strings.contains(notification.toLowerCase(), 'thành công')} ? 'alert alert-success' : 'alert alert-danger'"
+         class="alert alert-dismissible fade show"
+         role="alert"
+         style="position: fixed; z-index: 15; margin-left: 80%; margin-top: -40%;">
+      <strong th:text="${notification}"></strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="row">
+      <h1 style="text-align: center;">Danh Sách Hóa đơn</h1>
+
+      <th:block th:replace="component/leftBoard :: leftBoard"></th:block>
+
+      <div class="col-md-10">
+        <div class="row justify-content-between">
+          <div class="col-md-4">
+            <form class="search-bar" th:action="@{/manage-invoice}" method="get" onsubmit="return validateDateRange()">
+              <div class="input-container">
+                <label for="bookingDateFrom"><b>Chọn ngày: </b></label>
+                <input id="bookingDateFrom" class="form-control" type="date" name="createdDate"
+                       th:value="${createdDate}" />
+              </div>
+              <input type="hidden" name="isPaid" th:value="${isPaid}" />
+            </form>
+
+          </div>
+
+          <div class="col-md-2" style="margin-right: -530px; font-size: 20px;">
+            <b>Sắp xếp: </b>
+          </div>
+
+          <div class="col-md-3">
+            <select class="form-select" aria-label="Default select example" onchange="location = this.value;">
+              <option th:value="@{/manage-invoice(createdDate=${createdDate}, status='All')}"
+                      th:selected="${status == 'All'}">All</option>
+              <option th:value="@{/manage-invoice(createdDate=${createdDate}, status='No_Paid')}"
+                      th:selected="${status == 'No_Paid'}">Chờ thanh toán</option>
+              <option th:value="@{/manage-invoice(createdDate=${createdDate}, status='Paid')}"
+                      th:selected="${status == 'Paid'}">Đã thanh toán</option>
+            </select>
+          </div>
+        </div>
+
+        <div th:if="${invoices.size() == 0}" style="text-align: center;">
+          <h3 style="color:red;">Không tìm thấy kết quả</h3>
+        </div>
+
+        <div class="row" style="margin-top:40px;" th:if="${invoices.size() > 0}">
+          <div class="container mtop" style="width:100%">
+            <table class="table table-striped table-bordered" id="sortTable">
+              <thead>
+              <tr>
+                <th>Mã hoá đơn</th>
+                <th>Họ tên</th>
+                <th>Dob</th>
+                <th>SDT</th>
+                <th>Ngày khám</th>
+                <th>Khung giờ</th>
+                <th>Tổng tiền thanh toán</th>
+                <th>Tình trạng</th>
+                <th>Hành động</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="c, iterStat : ${invoices}">
+                <td>
+                  <a href="#"
+                     th:data-invoice-id="${c.invoiceId}"
+                     th:data-patient-phoneNumber="${c.session.booking.phoneNumber}"
+                     th:data-sessionDate="${c.session.sessionDate}"
+                     th:data-slot="${c.session.booking.slot.startTime + '-' + c.session.booking.slot.endTime}"
+                     th:data-status="${c.status}"
+                     onclick="showBookingModal(this)"
+                     th:text="${c.invoiceId}">
+                  </a>
+                </td>
+
+                <td th:text="${c.session.booking.patientName}"></td>
+                <td th:text="${c.session.booking.dob}"></td>
+                <td th:text="${c.session.booking.phoneNumber}"></td>
+                <td th:text="${c.session.sessionDate}"></td>
+                <td th:text="${c.session.booking.slot.startTime + '-' + c.session.booking.slot.endTime}"></td>
+
+                <!-- ✅ Hiển thị tổng tiền thanh toán -->
+                <td th:text="${fees[iterStat.index]} + ' VNĐ'"></td>
+
+                <td th:text="${c.status}"></td>
+                <td>
+                  <div th:if="${c.status == 'No_Paid'}">
+                    <div class="row">
+                      <form th:action="@{/update-invoice}" method="post" onsubmit="return confirm('Xác nhận hóa đơn này đã thanh toán?')">
+                        <input type="hidden" name="invoiceId" th:value="${c.invoiceId}" />
+                        <input type="hidden" name="status" value="Paid" />
+                        <input type="hidden" name="totalFee" th:value="${fees[iterStat.index]}" />
+                        <button type="submit" class="btn btn-success btn-lg active" style="font-size: 12px">Xác nhận thanh toán</button>
+                      </form>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="invoiceModalLabel">Chi tiết hóa đơn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <!-- Cột dịch vụ -->
+          <div class="col-md-6">
+            <h5>Phí dịch vụ</h5>
+            <p><strong>Tên dịch vụ:</strong> <span id="serviceName"></span></p>
+            <p><strong>Giá:</strong> <span id="servicePrice"></span> VNĐ</p>
+          </div>
+
+          <!-- Cột thuốc -->
+          <div class="col-md-6">
+            <h5>Tiền thuốc</h5>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Thuốc</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+              </tr>
+              </thead>
+              <tbody id="medicineTableBody"></tbody>
+            </table>
+            <p class="text-end"><strong>Tổng tiền thuốc:</strong> <span id="medicineTotal"></span> VNĐ</p>
+          </div>
+        </div>
+
+        <div class="text-end mt-3">
+          <h5>Tổng thanh toán: <span id="totalFee"></span> VNĐ</h5>
+        </div>
+
+        <form id="confirmForm" method="post" th:action="@{/update-invoice}" onsubmit="return confirm('Xác nhận thanh toán?')">
+          <input type="hidden" name="invoiceId" id="invoiceIdInput">
+          <input type="hidden" name="status" value="Paid">
+          <input type="hidden" name="totalFee" id="totalFeeInput">
+          <div class="text-end">
+            <button id="confirmPaymentBtn" type="submit" class="btn btn-success">Xác nhận thanh toán</button>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+  async function showBookingModal(link) {
+    const invoiceId = link.getAttribute("data-invoice-id");
+    const status = link.getAttribute("data-status");
+
+    // Gọi API hoặc endpoint trả về thông tin chi tiết hóa đơn
+    const res = await fetch(`/api/invoice-detail/${invoiceId}`);
+    if (!res.ok) return alert("Không thể lấy dữ liệu hóa đơn");
+    const data = await res.json();
+
+    // Gán thông tin vào modal
+    document.getElementById("invoiceIdInput").value = invoiceId;
+    document.getElementById("serviceName").textContent = data.serviceName || 'N/A';
+    document.getElementById("servicePrice").textContent = data.servicePrice.toLocaleString();
+
+    // Thuốc
+    const tbody = document.getElementById("medicineTableBody");
+    tbody.innerHTML = "";
+    let totalMedicine = 0;
+    data.medicines.forEach(med => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${med.name}</td>
+        <td>${med.quantity}</td>
+        <td>${(med.price * med.quantity).toLocaleString()}</td>`;
+      tbody.appendChild(row);
+      totalMedicine += med.price * med.quantity;
+    });
+
+    document.getElementById("medicineTotal").textContent = totalMedicine.toLocaleString();
+    const total = data.servicePrice + totalMedicine;
+    document.getElementById("totalFee").textContent = total.toLocaleString();
+    document.getElementById("totalFeeInput").value= total;
+
+    // Ẩn/hiện nút xác nhận
+     // ✅ Ẩn/hiện nút "Xác nhận thanh toán"
+  const confirmBtn = document.getElementById("confirmPaymentBtn");
+  if (status === "No_Paid") {
+    confirmBtn.style.display = "inline-block";
+  } else {
+    confirmBtn.style.display = "none";
+  }
+
+    // Hiện modal
+    new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+  }
+</script>
+
+</body>
+</html>

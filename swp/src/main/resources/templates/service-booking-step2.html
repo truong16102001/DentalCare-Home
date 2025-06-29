@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/x-icon" href="/images/logo.png">
@@ -199,36 +199,37 @@
 <th:block th:replace="component/account :: account"></th:block>
 
 <div class="card" style="margin-top: 10%; margin-bottom: 5%">
+  <form th:action="@{/service-booking}" method="post" id="bookingForm">
   <div class="row">
-
     <!-- ORDER FORM SECTION -->
     <div class="col-md-6 style-btn summary">
-      <form class="input-name" th:action="@{/service-booking}" method="post">
-        <div class="row">
           <h4 class="cal"><b>Thông tin khách hàng đã nhập</b></h4>
-        </div>
         <hr>
         <input type="hidden" name="step" th:value="2">
-
+      <div class="row main align-items-center">
         <label for="fullname">Họ Tên</label>
-        <input id="fullname" type="text" name="fullName" th:value="${bookingInfo.fullName}" required readonly>
-
+        <input id="fullname" type="text" name="fullName" th:value="${session.bookingInfo.fullName}" required readonly>
+      </div>
+      <div class="row main align-items-center">
         <label for="email">EMAIL</label>
-        <input id="email" type="text" name="email" th:value="${bookingInfo.email}" required readonly>
-
+        <input id="email" type="text" name="email" th:value="${session.bookingInfo.email}" required readonly>
+      </div>
+      <div class="row main align-items-center">
         <label for="phone">SỐ ĐIỆN THOẠI</label>
-        <input id="phone" type="text" name="phone" th:value="${bookingInfo.phone}" required readonly>
+        <input id="phone" type="text" name="phone" th:value="${session.bookingInfo.phone}" required readonly>
+      </div>
 
+      <div class="row main align-items-center">
         <label for="address">ĐỊA CHỈ</label>
-        <input id="address" type="text" name="address" th:value="${bookingInfo.address}" required readonly>
-
+        <input id="address" type="text" name="address" th:value="${session.bookingInfo.address}" required readonly>
+      </div>
+      <div class="row main align-items-center">
         <label for="note">GHI CHÚ</label>
-        <textarea id="note" class="form-control" name="note" rows="3" th:text="${bookingInfo.note}" required></textarea>
-
+        <textarea id="note" class="form-control" name="note" rows="3" th:value="${session.bookingInfo.note}" th:text="${session.bookingInfo.note}" required readonly></textarea>
+      </div>
         <div class="back-to-shop text-muted">
-          <a th:href="@{/service-booking(id=${session.service.serviceId}, step=1, fullName=bookingInfo.fullName, email=bookingInfo.email, phone=bookingInfo.phone, address=bookingInfo.address, note=bookingInfo.note)}">&leftarrow; Trở lại</a>
+          <a th:href="@{/service-booking(id=${session.service.serviceId}, step=1)}">&leftarrow; Trở lại</a>
         </div>
-      </form>
     </div>
 
     <!-- CART SECTION -->
@@ -238,6 +239,7 @@
           <div class="col">
             <h4><b>Dịch vụ</b></h4>
           </div>
+          <hr>
         </div>
       </div>
       <div class="scBar">
@@ -250,20 +252,21 @@
           </div>
           <div class="col" style="text-align: center;" th:text="${session.service.price + '₫'}"></div>
         </div>
-
-        <label for="bookingDate">Ngày khám</label>
-        <input type="date" id="bookingDate" name="bookingDate" required
-               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
-
-        <label for="timeSlot">Khung giờ</label>
-        <select name="timeSlot" id="timeSlot" required>
-          <option value="" disabled selected>-- Chọn khung giờ --</option>
-          <th:block th:each="slot : ${slots}">
-            <option th:value="${#strings.concat(#temporals.format(slot.startTime, 'HH:mm'), '-', #temporals.format(slot.endTime, 'HH:mm'))}"
-                    th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">
-            </option>
-          </th:block>
-        </select>
+        <div class="row main align-items-center">
+          <label for="bookingDate">Ngày khám</label>
+          <input type="date" id="bookingDate" name="bookingDate" required
+                 th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+        </div>
+        <div class="row main align-items-center">
+          <label for="bookingDate">Chọn khung giờ</label>
+          <select name="timeSlot" id="timeSlot" required>
+            <th:block th:each="slot : ${slots}">
+              <option th:value="${slot.slotId}"
+                      th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">
+              </option>
+            </th:block>
+          </select>
+        </div>
       </div>
 
       <div class="back-to-shop text-muted">
@@ -272,14 +275,57 @@
     </div>
 
   </div>
+    <div class="text-end mt-3">
+      <button type="submit" class="btn btn-primary">Đặt lịch</button>
+    </div>
+  </form>
 </div>
 
 <!-- Optional Footer -->
 <th:block th:replace="component/footer :: footer"></th:block>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+      const bookings = [
+          /*[# th:each="b, iter : ${bookings}" ]*/
+          {
+              bookingDate: [[${b.appointmentDate}]],
+              timeSlot: [[${b.slot.slotId}]],
+              fullName: [[${'"' + b.patientName + '"'}]],
+              dob: [[${'"' + #dates.format(b.dob, 'yyyy-MM-dd') + '"'}]],
+              serviceName: [[${'"' + b.service.serviceName + '"'}]]
+          }/*[# th:if="${!iter.last}" ]*/,/*[/]*/
+          /*[/]*/
+      ];
+  /*]]>*/
+</script>
+
+
+<script>
+  document.getElementById("bookingForm").addEventListener("submit", function (e) {
+      const selectedDate = document.getElementById("bookingDate").value;
+      const selectedSlot = document.getElementById("timeSlot").value;
+
+      const conflict = bookings.find(b =>
+          b.bookingDate === selectedDate && b.timeSlot.toString() === selectedSlot
+      );
+
+      if (conflict) {
+          const message = `⚠️ Bạn đã đăng ký lịch ngày ${conflict.bookingDate}, khung giờ ${conflict.timeSlot}
+cho bệnh nhân ${conflict.fullName}, dịch vụ ${conflict.serviceName}.
+Bạn chắc chắn muốn tiếp tục đăng ký?`;
+
+          if (!confirm(message)) {
+              e.preventDefault(); // Ngăn không cho submit
+          }
+      }
+  });
+</script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+
 </body>
 
 </html>

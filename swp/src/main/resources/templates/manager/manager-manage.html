@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" th:href="'../static/images/logo.png'">
+  <title>Manager Management</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/fonts/themify-icons/themify-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/1.0.1/css/themify-icons.css">
+  <link rel="stylesheet" href="/css/style1.css">
+  <link rel="stylesheet" href="/css/style2.css">
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-xxxxxxx" crossorigin="anonymous" />
+  <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+  <!-- Include JavaScript component -->
+  <th:block th:replace="component/javascript :: javascript"></th:block>
+  <style>
+    .swiper-container {
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+    }
+
+    .swiper-wrapper {
+        display: flex;
+    }
+
+    .swiper-slide {
+        flex-shrink: 0;
+        width: 100%; /* Đảm bảo mỗi slide chiếm trọn chiều rộng container */
+        box-sizing: border-box;
+    }
+
+  </style>
+  <style>
+    .labels {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+    li.nav-item a.active{
+        color: blue;
+        font-weight: bold;
+    }
+    li.nav-item a{
+        color: black;
+    }
+  </style>
+</head>
+<body>
+<div id="main">
+  <!-- Include Header -->
+  <th:block th:replace="component/header :: header"></th:block>
+  <div class="container-fluid" style="margin-top: 100px ">
+    <div class="row">
+      <h1 style="text-align: center;">Manager Dashboard</h1>
+      <th:block th:replace="component/leftBoard :: leftBoard"></th:block>
+    </div>
+  </div>
+</div>
+</body>
+</html>

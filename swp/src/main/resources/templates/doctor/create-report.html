@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Kết quả khám bệnh</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+  <style>
+    .container-split {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .left, .right {
+        flex: 1;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .medicine-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 10px;
+    }
+
+    .medicine-list li {
+        list-style: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        background-color: #eee;
+        margin-bottom: 5px;
+        border-radius: 5px;
+    }
+
+    .medicine-list li:hover {
+        background-color: #ddd;
+    }
+    .medicine-block {
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+    #selectedMedicines {
+  max-height: 500px; /* bạn có thể điều chỉnh cao thấp tùy ý */
+  overflow-y: auto;
+  border: 1px dashed #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+  </style>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Bootstrap 5 JS (cần Popper nếu bạn chưa dùng bundle) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+  <h2 class="mt-4">Tạo kết quả khám bệnh</h2>
+  <form th:action="@{/create-report}" method="post">
+    <input type="hidden" name="sessionId" th:value="${ses.sessionId}" />
+
+    <div class="container-split">
+      <!-- Cột trái: Form kết quả -->
+      <div class="left">
+        <h5>Thông tin kết quả</h5>
+
+        <div class="mb-3">
+          <label>Chẩn đoán</label>
+          <textarea class="form-control" name="diagnosis" rows="2" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Phương pháp điều trị</label>
+          <textarea class="form-control" name="treatmentMethod" rows="2" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>Ghi chú bác sĩ</label>
+          <textarea class="form-control" name="doctorNote" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- Cột phải: Tìm thuốc -->
+      <div class="right">
+        <h5>Thêm thuốc</h5>
+
+        <div id="selectedMedicines" class="mb-3"></div>
+        <!-- Nút mở modal -->
+        <button type="button" class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#medicineModal">
+          Thêm thuốc
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="mt-4 text-end">
+      <button type="submit" class="btn btn-success">Lưu kết quả và thêm thuốc</button>
+    </div>
+  </form>
+  <a th:href="@{${session.historyUrl}}">
+    Trở về
+  </a>
+</div>
+
+<!-- MODAL THÊM THUỐC -->
+<div class="modal fade" id="medicineModal" tabindex="-1" aria-labelledby="medicineModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thêm thuốc</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Chọn thuốc</label>
+          <select id="selectMedicine" class="form-select" required>
+            <option value="">-- Chọn thuốc --</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Số lượng</label>
+          <input type="number" id="modalQuantity" class="form-control" min="1" value="1" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Ghi chú</label>
+          <textarea id="modalNote" class="form-control" rows="2" required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+        <button type="button" class="btn btn-primary" id="confirmAddMedicine">Thêm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    let medicineMap = {};
+
+    // Load danh sách thuốc khi mở modal
+    $('#medicineModal').on('show.bs.modal', function () {
+      if ($('#selectMedicine option').length <= 1) {
+        $.get('/medicines', function (data) {
+          medicineMap = {};
+          $('#selectMedicine').empty().append('<option value="">-- Chọn thuốc --</option>');
+          data.forEach(function (m) {
+            medicineMap[m.medicineId] = m.medicineName;
+            $('#selectMedicine').append(`<option value="${m.medicineId}">${m.medicineName}</option>`);
+          });
+        });
+      }
+    });
+
+    // Thêm thuốc khi xác nhận
+    $('#confirmAddMedicine').on('click', function () {
+      const id = $('#selectMedicine').val();
+      const name = $('#selectMedicine option:selected').text();
+      const qty = $('#modalQuantity').val();
+      const note = $('#modalNote').val();
+
+      if (!id || !qty || !note) {
+        alert("Vui lòng nhập đầy đủ thông tin.");
+        return;
+      }
+
+     const medicineString = `${id}_${qty}_${note}`;
+
+const html = `
+  <div class="medicine-block border p-2 mb-2 rounded bg-light">
+    <input type="hidden" name="medicineData" value="${medicineString}" />
+    <div><strong>Thuốc:</strong> ${name}</div>
+    <div><strong>Số lượng:</strong> ${qty}</div>
+    <div><strong>Ghi chú:</strong> ${note}</div>
+    <button type="button" class="btn btn-danger btn-sm remove-btn mt-2">Xóa</button>
+  </div>`;
+      $('#selectedMedicines').append(html);
+
+      // Reset và đóng modal
+      $('#selectMedicine').val('');
+      $('#modalQuantity').val('1');
+      $('#modalNote').val('');
+      $('#medicineModal').modal('hide');
+    });
+
+    // Xóa thuốc khỏi danh sách
+    $(document).on('click', '.remove-btn', function () {
+      $(this).closest('.medicine-block').remove();
+    });
+  });
+</script>
+</body>
+</html>

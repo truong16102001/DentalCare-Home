@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
   <link rel="icon" type="image/x-icon" href="./images/lg.jpg">
@@ -90,7 +90,7 @@
 
           <div class="row">
             <!-- User not logged in -->
-            <div class="col-lg-6" th:if="${(session.us == null) or (session.us != null and session.us.role.roleId == 5)}">
+            <div class="col-lg-6" th:if="${(session.userId == null) or (session.userId != null and session.roleId == 5)}">
               <a class="btn btn-outline-danger" th:href="@{/service-booking(id=${service.serviceId}, step=1)}" style="font-size: 20px">
                 Đặt lịch
               </a>

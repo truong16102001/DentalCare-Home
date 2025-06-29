@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Thông tin khách hàng</title>
@@ -210,19 +210,19 @@
         <input type="hidden" name="step" th:value="2" >
 
         <label for="fullname">Họ Tên</label>
-        <input id="fullname" type="text" name="fullName" th:value="${session.us != null ? session.us.fullName : bookingInfo.fullName}" required>
+        <input id="fullname" type="text" name="fullName" th:value="${session.fullName ?: session.bookingInfo.fullName}" required>
 
         <label for="email">EMAIL</label>
-        <input id="email" type="text" name="email" th:value="${session.us != null ? session.us.email : bookingInfo.email}" required>
+        <input id="email" type="text" name="email" th:value="${session.email != null ? session.email : session.bookingInfo.email}" required>
 
         <label for="phone">SỐ ĐIỆN THOẠI</label>
-        <input id="phone" type="text" name="phone" th:value="${session.us != null ? session.us.phoneNumber : bookingInfo.phone}" required>
+        <input id="phone" type="text" name="phone" th:value="${session.phoneNumber != null ? session.phoneNumber : session.bookingInfo.phone}" required>
 
         <label for="address">ĐỊA CHỈ</label>
-        <input id="address" type="text" name="address" th:value="${session.us != null ? session.us.address : bookingInfo.address}" required>
+        <input id="address" type="text" name="address" th:value="${session.address != null ? session.address : session.bookingInfo.address}" required>
 
         <label for="note">GHI CHÚ</label>
-        <textarea id="note" required class="form-control" name="note" rows="3" th:value="${bookingInfo.note}" placeholder="Nhập thông tin liên hệ khác, địa chỉ khác ..."></textarea>
+        <textarea id="note" required class="form-control" name="note" rows="3" th:value="${session.bookingInfo.note}" th:text="${session.bookingInfo.note}" placeholder="Nhập thông tin liên hệ khác, địa chỉ khác ..."></textarea>
         <button type="submit" class="btn" style="font-size: 20px;">Tiếp tục</button>
       </form>
     </div>

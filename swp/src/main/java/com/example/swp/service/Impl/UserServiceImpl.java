@@ -1,7 +1,9 @@
 package com.example.swp.service.Impl;
 
+import com.example.swp.entity.Role;
 import com.example.swp.entity.Token;
 import com.example.swp.entity.User;
+import com.example.swp.repository.RoleRepository;
 import com.example.swp.repository.TokenRepository;
 import com.example.swp.repository.UserRepository;
 import com.example.swp.service.UserService;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class UserServiceImpl  implements UserService {
     private UserRepository userRepository;
     private TokenRepository tokenRepository;
+    private RoleRepository roleRepository;
 
     @Override
     public User findByEmail(String email) {
@@ -65,6 +68,12 @@ public class UserServiceImpl  implements UserService {
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
         tokenRepository.save(resetToken);
         return resetToken.getToken();
+    }
+
+    @Override
+    public List<User> findByRoleId(Integer roleId) {
+        Role role = roleRepository.findById(roleId).orElse(null);
+        return userRepository.findByRole(role);
     }
 
 }

@@ -1,37 +1,44 @@
 package com.example.swp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.Date;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Builder
-@Table(name = "Working_Schedules")
+@Table(name = "WorkingSchedules")
 public class WorkingSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer scheduleId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JoinColumn(name = "employee_id")
     private User employee;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date date_working;
+    @Temporal(TemporalType.DATE)
+    private LocalDate dateWorking;
 
-    private LocalTime checkinTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
-    private LocalTime checkoutTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    private Shift shift;
 
-    private  Boolean isWoring;
+    @Column(name = "is_working")
+    private Boolean isWorking = true;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedTime;

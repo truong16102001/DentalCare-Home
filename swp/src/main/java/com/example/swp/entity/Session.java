@@ -1,12 +1,13 @@
 package com.example.swp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -20,20 +21,19 @@ public class Session {
     private Integer sessionId;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private User employee;
-
-    @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
     @ManyToOne
-    @JoinColumn(name = "slot_id")
-    private Slot slot;
+    @JsonManagedReference
+    @JoinColumn(name = "schedule_id")
+    private WorkingSchedule schedule;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
+    private LocalDate sessionDate;
 
-    private Date sessionDate;
+    private  String status; // Not start, processing, ended
+
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
+    private PatientReport patientReport;
 }

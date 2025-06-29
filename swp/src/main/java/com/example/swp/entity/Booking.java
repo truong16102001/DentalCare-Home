@@ -1,16 +1,16 @@
 package com.example.swp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -25,12 +25,14 @@ public class Booking {
     private Service service;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "patient_id")
     private User patient;
 
     @ManyToOne
-    @JoinColumn(name = "recipient_id")
-    private User recipient;
+    @JsonManagedReference
+    @JoinColumn(name = "updated_user_id")
+    private User updatedUser;
 
     @Column(length = 200)
     private String patientName;
@@ -52,15 +54,16 @@ public class Booking {
     @JoinColumn(name = "slot_id")
     private Slot slot;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
-    private Date appointmentDate;
+    private LocalDate appointmentDate;
 
     @Column(length = 20)
     private String status;
 
     @Column(length = 500)
     private String note;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date registeredTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedTime;

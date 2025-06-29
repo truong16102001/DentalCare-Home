@@ -30,6 +30,6 @@ public class Service {
 
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<ServiceImage> serviceImages = new ArrayList<>();
 }

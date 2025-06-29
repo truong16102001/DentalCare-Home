@@ -17,7 +17,6 @@ import java.util.Set;
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-
     private final UserRepository userRepository;
 
     public CustomAuthenticationSuccessHandler(UserRepository userRepository) {
@@ -31,19 +30,34 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            session.setAttribute("us", user);
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("fullName", user.getFullName());
+            session.setAttribute("email", user.getEmail());
+            session.setAttribute("roleId", user.getRole().getRoleId());
+            session.setAttribute("roleName", user.getRole().getRoleName());
+            session.setAttribute("dob", user.getDob());
+            session.setAttribute("avatar", user.getAvatar());
+            session.setAttribute("address", user.getAddress());
+            session.setAttribute("password", user.getPassword()); // nên cân nhắc không lưu
+            session.setAttribute("gender", user.getGender());
+            session.setAttribute("phoneNumber", user.getPhoneNumber());
+            session.setAttribute("isActive", user.getIsActive());
         }
         Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
-        if (roles.contains("ROLE_ADMIN")) {
-            response.sendRedirect("/admin/dashboard");
-        } else if (roles.contains("ROLE_MANAGER")) {
-            response.sendRedirect("/manager");
-        } else if (roles.contains("ROLE_DOCTOR")) {
-            response.sendRedirect("/doctor-care");
-        } else {
+        if (roles.contains("ADMIN")) {
+            response.sendRedirect("/admin-manage");
+        } else if(roles.contains("MANAGER")) {
+            response.sendRedirect("/manager-manage");
+        }
+        else if(roles.contains("DOCTOR")) {
+            response.sendRedirect("/doctor-manage");
+        }
+        else if(roles.contains("RECEPTIONIST")) {
+            response.sendRedirect("/receptionist-manage");
+        }
+        else{
             response.sendRedirect("/home");
         }
     }
-
 
 }

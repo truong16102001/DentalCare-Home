@@ -7,33 +7,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "Invoice")
+@Table(name = "Invoices")
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer invoiceId;
 
     @OneToOne
-    @JoinColumn(name = "booking_id", unique = true)
-    private Booking booking;
+    @JoinColumn(name = "session_id", unique = true)
+    private Session session;
 
-    private BigDecimal serviceFee;
+    private BigDecimal totalFee;
 
-    private BigDecimal medicineFee;
+    private String status;
 
-    private BigDecimal totalAmount;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paidTime;
 
-    private Boolean isPaid;
+    private LocalDate createdDate;
 
-    private LocalDateTime paidTime;
-
-    private LocalDateTime createdTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdTime;
 }
-

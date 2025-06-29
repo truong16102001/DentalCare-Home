@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/logo.png}">
+    <title>Medicine management</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="stylesheet" th:href="@{/assets/fonts/themify-icons/themify-icons.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/1.0.1/css/themify-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style1.css}">
+    <link rel="stylesheet" th:href="@{/css/style2.css}">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js"></script>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+
+    <!-- Include JavaScript component -->
+    <th:block th:replace="component/javascript :: javascript"></th:block>
+
+    <style>
+        li.nav-item a.active{
+            color: red;
+            font-weight: bold;
+        }
+        li.nav-item a{
+            color: black;
+        }
+        .form-select option{
+            background-color: transparent;
+        }
+
+        .input-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .input-container input[type="text"] {
+            padding-right: 30px;
+        }
+
+        .clear-icon {
+            position: absolute;
+            top: 50%;
+            color: red;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            display: none;
+        }
+
+        .input-container:hover .clear-icon {
+            display: block;
+        }
+
+        .product-item {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgb(0 0 0);
+            text-align: center;
+        }
+
+        .product-thumb {
+            width: 180px;
+            height: 250px;
+        }
+
+        .product-name {
+            /* You can adjust the font size as needed */
+            font-size: 14px;
+            /* You can add additional styles if needed */
+        }
+    </style>
+</head>
+<body>
+
+<div id="main">
+    <!-- Header -->
+    <th:block th:replace="component/header :: header"></th:block>
+
+    <div class="container-fluid" style="margin-top: 100px">
+        <div class="row">
+            <h1 style="text-align: center;">Danh sách thuốc</h1>
+
+            <th:block th:replace="component/leftBoard :: leftBoard"></th:block>
+
+            <div class="col-md-10">
+                <div th:if="${medicines.size() == 0}" style="text-align: center;">
+                    <h3 style="color:red;">Không tìm thấy kết quả</h3>
+                </div>
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createMedicineModal">
+                    Tạo thuốc
+                </button>
+
+                <div class="row" style="margin-top:40px;" th:if="${medicines.size() > 0}">
+                    <div class="container mtop" style="width:100%">
+                        <table class="table table-striped table-bordered" id="sortTable">
+                            <thead>
+                            <tr>
+                                <th>Mã thuốc</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên thuốc</th>
+                                <th>Đơn vị</th>
+                                <th>Giá</th>
+                                <th>Còn lại</th>
+                                <th>Hãng SX</th>
+                                <th>Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="m : ${medicines}">
+                                <td th:text="${m.medicineId}"></td>
+                                <td>
+                                    <img th:src="${m.image}" alt="Ảnh thuốc" style="height: 50px; width:50px" />
+                                </td>
+                                <td th:text="${m.medicineName}"></td>
+                                <td th:text="${m.unit}"></td>
+                                <td th:text="${m.price}"></td>
+                                <td th:text="${m.remainingQuantity}"></td>
+                                <td th:text="${m.manufacturer}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                            th:attr="data-id=${m.medicineId},
+                     data-name=${m.medicineName},
+                     data-image=${m.image},
+                     data-unit=${m.unit},
+                     data-price=${m.price},
+                     data-qty=${m.remainingQuantity},
+                     data-manufacturer=${m.manufacturer},
+                     data-ingredients=${m.ingredients}"
+                                            onclick="showEditModal(this)">
+                                        Sửa
+                                    </button>
+                                    <form th:action="@{/delete-medicine}" method="post" style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa thuốc này không?');">
+                                        <input type="hidden" name="medicineId" th:value="${m.medicineId}" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                    </form>
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add medicine Modal -->
+<div class="modal fade" id="createMedicineModal" tabindex="-1" aria-labelledby="createMedicineModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/create-medicine}" method="post" class="modal-content" enctype="multipart/form-data">
+        <div class="modal-header">
+                <h5 class="modal-title" id="createMedicineModalLabel">Tạo thuốc mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="medicineId" class="form-label">Mã thuốc</label>
+                    <input type="text" class="form-control" id="medicineId" name="medicineId" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="medicineName" class="form-label">Tên thuốc</label>
+                    <input type="text" class="form-control" id="medicineName" name="medicineName" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="unit" class="form-label">Đơn vị</label>
+                    <input type="text" class="form-control" id="unit" name="unit">
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label">Giá</label>
+                    <input type="number" class="form-control" id="price" name="price">
+                </div>
+
+                <div class="mb-3">
+                    <label for="remainingQuantity" class="form-label">Số lượng còn</label>
+                    <input type="number" class="form-control" id="remainingQuantity" name="remainingQuantity">
+                </div>
+
+                <div class="mb-3">
+                    <label for="manufacturer" class="form-label">Nhà sản xuất</label>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer">
+                </div>
+
+                <div class="mb-3">
+                    <label for="ingredients" class="form-label">Thành phần</label>
+                    <textarea class="form-control" id="ingredients" name="ingredients" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-label">Hình ảnh</label>
+                    <input type="file" class="form-control" id="image" name="imageFile" accept="image/*" required />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary">Tạo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Medicine Modal -->
+<div class="modal fade" id="editMedicineModal" tabindex="-1" aria-labelledby="editMedicineModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/update-medicine}" method="post" class="modal-content" enctype="multipart/form-data">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMedicineModalLabel">Cập nhật thuốc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editMedicineId" name="medicineId" />
+
+                <div class="mb-3">
+                    <label for="editMedicineName" class="form-label">Tên thuốc</label>
+                    <input type="text" class="form-control" id="editMedicineName" name="medicineName" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Hình ảnh hiện tại</label><br>
+                    <img id="editImagePreview" src="" alt="Hình ảnh thuốc" style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 5px; border-radius: 5px;" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">Chọn ảnh mới (nếu muốn cập nhật)</label>
+                    <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*" />
+                </div>
+
+
+                <div class="mb-3">
+                    <label for="editUnit" class="form-label">Đơn vị</label>
+                    <input type="text" class="form-control" id="editUnit" name="unit">
+                </div>
+
+                <div class="mb-3">
+                    <label for="editPrice" class="form-label">Giá</label>
+                    <input type="number" class="form-control" id="editPrice" name="price">
+                </div>
+
+                <div class="mb-3">
+                    <label for="editQty" class="form-label">Số lượng còn</label>
+                    <input type="number" class="form-control" id="editQty" name="remainingQuantity">
+                </div>
+
+                <div class="mb-3">
+                    <label for="editManufacturer" class="form-label">Nhà sản xuất</label>
+                    <input type="text" class="form-control" id="editManufacturer" name="manufacturer">
+                </div>
+
+                <div class="mb-3">
+                    <label for="editIngredients" class="form-label">Thành phần</label>
+                    <textarea class="form-control" id="editIngredients" name="ingredients" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+      $('#sortTable').DataTable({
+        "pageLength": 10,
+        "lengthChange": false,
+        "ordering": false,
+        "searching": true, // <-- Bật tìm kiếm (hoặc xóa dòng này vì mặc định là true)
+        "language": {
+          "search": "Tìm kiếm:",
+          "paginate": {
+            "previous": "Trước",
+            "next": "Sau"
+          },
+          "info": "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
+          "zeroRecords": "Không tìm thấy kết quả phù hợp",
+          "infoEmpty": "Không có bản ghi nào",
+        }
+      });
+    });
+</script>
+<script>
+    function showEditModal(button) {
+    const imageBase64 = $(button).data('image');
+
+    $('#editMedicineId').val($(button).data('id'));
+    $('#editMedicineName').val($(button).data('name'));
+    $('#editUnit').val($(button).data('unit'));
+    $('#editPrice').val($(button).data('price'));
+    $('#editQty').val($(button).data('qty'));
+    $('#editManufacturer').val($(button).data('manufacturer'));
+    $('#editIngredients').val($(button).data('ingredients'));
+
+    // Nếu là ảnh base64, gán vào src
+    if (imageBase64) {
+        $('#editImagePreview').attr('src', 'data:image/jpeg;base64,' + imageBase64);
+    } else {
+        $('#editImagePreview').attr('src', '');
+    }
+
+    $('#editMedicineModal').modal('show');
+}
+
+</script>
+
+</body>
+</html>

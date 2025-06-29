@@ -1,5 +1,4 @@
 package com.example.swp.entity;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -19,13 +19,9 @@ public class PatientReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer patientReportId;
 
-    @ManyToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
-
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private User doctor;
+    @OneToOne
+    @JoinColumn(name = "session_id")
+    private Session session;
 
     @Column(length = 500)
     private String diagnosis;
@@ -38,5 +34,8 @@ public class PatientReport {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedTime;
-}
 
+    @OneToMany(mappedBy = "patientReport", fetch = FetchType.LAZY)
+    private List<ReportMedicine> reportMedicines;
+
+}

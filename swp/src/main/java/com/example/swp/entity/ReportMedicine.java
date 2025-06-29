@@ -11,23 +11,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(ReportMedicineId.class)
 @Table(name = "Report_Medicine")
 public class ReportMedicine {
     @Id
-    @ManyToOne
-    @JoinColumn(name = "patient_report_id")
-    private PatientReport patientReport;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "medicine_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id", nullable = false)
     private Medicine medicine;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_report_id", nullable = false)
+    private PatientReport patientReport;
 
     private Integer quantity;
 
-    private Integer price;
-
-    @Column(length = 200)
+    @Column(length = 1000)
     private String note;
 }

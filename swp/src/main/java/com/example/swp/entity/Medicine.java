@@ -1,9 +1,5 @@
 package com.example.swp.entity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +17,11 @@ public class Medicine {
     private String medicineId;
 
     @Column(length = 200)
-    private String name;
+    private String medicineName;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String image;
 
     @Column(length = 100)
     private String unit;
@@ -35,4 +35,6 @@ public class Medicine {
 
     @Column(length = 200)
     private String manufacturer;
+
+    private Boolean isActive;
 }

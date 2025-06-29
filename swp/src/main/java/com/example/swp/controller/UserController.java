@@ -6,6 +6,7 @@ import com.example.swp.entity.Token;
 import com.example.swp.entity.User;
 import com.example.swp.repository.RoleRepository;
 import com.example.swp.repository.TokenRepository;
+import com.example.swp.repository.UserRepository;
 import com.example.swp.service.EmailService;
 import com.example.swp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,10 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping
@@ -36,13 +34,15 @@ public class UserController {
     RoleRepository roleRepository;
     EmailService emailService;
     TokenRepository tokenRepository;
+    UserRepository userRepository;
 
     @Autowired
-    public  UserController(UserService userService, EmailService emailService, RoleRepository roleRepository, TokenRepository tokenRepository){
+    public  UserController(UserService userService, EmailService emailService, RoleRepository roleRepository, TokenRepository tokenRepository, UserRepository userRepository){
         this.userService = userService;
         this.emailService = emailService;
         this.roleRepository = roleRepository;
         this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
     }
 
 
@@ -58,7 +58,7 @@ public class UserController {
         if (session != null) {
             session.invalidate(); // xóa toàn bộ session
         }
-        return "redirect:/login"; // nên redirect thay vì trả về tên view trực tiếp
+        return "redirect:/home"; // nên redirect thay vì trả về tên view trực tiếp
     }
 
     @PostMapping("/editprofile")
@@ -106,7 +106,18 @@ public class UserController {
             user.setAddress(address);
             user.setAvatar(base64Avatar);
             userService.save(user);
-            session.setAttribute("us", user);
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("fullName", user.getFullName());
+            session.setAttribute("email", user.getEmail());
+            session.setAttribute("roleId", user.getRole().getRoleId());
+            session.setAttribute("roleName", user.getRole().getRoleName());
+            session.setAttribute("dob", user.getDob());
+            session.setAttribute("avatar", user.getAvatar());
+            session.setAttribute("address", user.getAddress());
+            session.setAttribute("password", user.getPassword());
+            session.setAttribute("gender", user.getGender());
+            session.setAttribute("phoneNumber", user.getPhoneNumber());
+            session.setAttribute("isActive", user.getIsActive());
 
             session.setAttribute("notification", "Cập nhật thông tin thành công !");
         }
@@ -180,7 +191,7 @@ public class UserController {
         user.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         user.setAddress(userRegisterDTO.getAddress());
         user.setDob(userRegisterDTO.getDob());
-        user.setIsActive(true); // chưa kích hoạt
+        user.setIsActive(true);
         user.setRole(defaultRole.get());
         userService.save(user);
         session.setAttribute("notification", "Đăng ký thành công. Chúng tôi đã gửi mật khẩu đăng nhập tới email: " + user.getEmail());
@@ -224,7 +235,6 @@ public class UserController {
         return "reset-password";
     }
 
-
     @PostMapping("/reset-password")
     public String processResetPassword(
             @RequestParam(name = "token", required = true) String token,
@@ -254,5 +264,85 @@ public class UserController {
         model.addAttribute("notification", "Mật khẩu đã được thay đổi thành công!");
         tokenRepository.delete(resetToken); // Xóa token sau khi sử dụng
         return "login";
+    }
+
+    @GetMapping("/manage-user")
+    public String getManageUserPage(@RequestParam(name = "keyword", required = false) String keyword,
+                                    @RequestParam(name = "roleId", required = false) Integer roleId,Model model) {
+
+        List<User> users;
+
+        if ((keyword == null || keyword.trim().isEmpty()) && roleId == null) {
+            // Trường hợp: Không có keyword và roleId → lấy tất cả trừ roleId = 1
+            users = userRepository.findByRole_RoleIdNot(1);
+        } else if ((keyword == null || keyword.trim().isEmpty())) {
+            // Có roleId, không có keyword
+            users = roleId == 1
+                    ? new ArrayList<>()
+                    : userRepository.findByRole_RoleId(roleId);
+        } else if (roleId == null) {
+            // Có keyword, không có roleId → search email, trừ roleId = 1
+            users = userRepository.findByEmailContainingAndRole_RoleIdNot(keyword.trim(), 1);
+        } else {
+            // Có cả keyword và roleId
+            users = userRepository.findByEmailContainingAndRole_RoleId(keyword.trim(), roleId);
+        }
+
+        List<Role> roles = roleRepository.findAll()
+                .stream()
+                .filter(role -> role.getRoleId() != 1)
+                .collect(Collectors.toList());
+
+        model.addAttribute("users", users);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("roleId", roleId);
+        model.addAttribute("roles", roles);
+        return "admin/manage-user";
+    }
+
+    @PostMapping("/toggle-user")
+    public String toggleUserStatus(@RequestParam("userId") Integer userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setIsActive(!Boolean.TRUE.equals(user.getIsActive())); // đảo trạng thái
+            userRepository.save(user);
+        }
+        return "redirect:/manage-user";
+    }
+
+    @PostMapping("/create-user")
+    public String createUser(@RequestParam String fullName,
+                             @RequestParam String email,
+                             @RequestParam String phoneNumber,
+                             @RequestParam String password,
+                             @RequestParam Integer roleId) {
+        Role role = roleRepository.findById(roleId).orElse(null);
+
+        User user = new User();
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPhoneNumber(phoneNumber);
+        user.setPassword(password);
+        user.setRole(role);
+        user.setIsActive(true);
+        userRepository.save(user);
+        return "redirect:/manage-user";
+    }
+
+    @PostMapping("/update-user")
+    public String updateUser(@ModelAttribute User updatedUser) {
+        Optional<User> optional = userRepository.findById(updatedUser.getUserId());
+        if (optional.isPresent()) {
+            User user = optional.get();
+            user.setFullName(updatedUser.getFullName());
+            user.setEmail(updatedUser.getEmail());
+            user.setPhoneNumber(updatedUser.getPhoneNumber());
+            user.setDob(updatedUser.getDob());
+            user.setGender(updatedUser.getGender());
+            user.setAddress(updatedUser.getAddress());
+            userRepository.save(user);
+        }
+        return "redirect:/manage-user";
     }
 }

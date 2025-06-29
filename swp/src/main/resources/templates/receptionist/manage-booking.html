@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" th:href="@{/images/logo.png}">
+  <title>Booking management</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+  <link rel="stylesheet" th:href="@{/assets/fonts/themify-icons/themify-icons.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/1.0.1/css/themify-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style1.css}">
+  <link rel="stylesheet" th:href="@{/css/style2.css}">
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+
+  <!-- Include JavaScript component -->
+  <th:block th:replace="component/javascript :: javascript"></th:block>
+
+  <style>
+    li.nav-item a.active{
+        color: red;
+        font-weight: bold;
+    }
+    li.nav-item a{
+        color: black;
+    }
+    .form-select option{
+        background-color: transparent;
+    }
+
+    .input-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .input-container input[type="text"] {
+        padding-right: 30px;
+    }
+
+    .clear-icon {
+        position: absolute;
+        top: 50%;
+        color: red;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        display: none;
+    }
+
+    .input-container:hover .clear-icon {
+        display: block;
+    }
+
+    .product-item {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgb(0 0 0);
+        text-align: center;
+    }
+
+    .product-thumb {
+        width: 180px;
+        height: 250px;
+    }
+
+    .product-name {
+        /* You can adjust the font size as needed */
+        font-size: 14px;
+        /* You can add additional styles if needed */
+    }
+  </style>
+</head>
+<body>
+
+<div id="main">
+  <!-- Header -->
+  <th:block th:replace="component/header :: header"></th:block>
+
+  <div class="container-fluid" style="margin-top: 100px">
+    <div th:if="${notification != null}"
+         th:classappend="${#strings.contains(notification.toLowerCase(), 'thành công')} ? 'alert alert-success' : 'alert alert-danger'"
+         class="alert alert-dismissible fade show"
+         role="alert"
+         style="position: fixed; z-index: 15; margin-left: 80%; margin-top: -40%;">
+      <strong th:text="${notification}"></strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="row">
+      <h1 style="text-align: center;">Danh Sách Lịch Hẹn</h1>
+
+      <th:block th:replace="component/leftBoard :: leftBoard"></th:block>
+
+      <div class="col-md-10">
+        <div class="row justify-content-between">
+          <div class="col-md-4">
+            <form class="search-bar" th:action="@{/manage-booking}" method="get" onsubmit="return validateDateRange()">
+              <div class="input-container">
+                <label for="bookingDateFrom"><b>Đăng ký từ: </b></label>
+                <input id="bookingDateFrom" class="form-control" type="date" name="bookingDateFrom"
+                       th:value="${bookingDateFrom}" required />
+
+                <label for="bookingDateTo"><b>đến:</b></label>
+                <input id="bookingDateTo" class="form-control" type="date" name="bookingDateTo"
+                       th:value="${bookingDateTo}" required />
+              </div>
+              <input type="hidden" name="status" th:value="${status}" />
+              <button type="submit" class="btn btn-dark">Tìm</button>
+            </form>
+
+          </div>
+
+          <div class="col-md-2" style="margin-right: -530px; font-size: 20px;">
+            <b>Sắp xếp: </b>
+          </div>
+
+          <div class="col-md-3">
+            <select class="form-select" aria-label="Default select example" onchange="location = this.value;">
+              <option th:value="@{/manage-booking(bookingDateFrom=${bookingDateFrom}, bookingDateTo=${bookingDateTo}, status=null)}"
+                      th:selected="${status == null}">Tất cả</option>
+              <option th:value="@{/manage-booking(bookingDateFrom=${bookingDateFrom}, bookingDateTo=${bookingDateTo}, status='Pending')}"
+                      th:selected="${status == 'Pending'}">Chờ xác nhận</option>
+              <option th:value="@{/manage-booking(bookingDateFrom=${bookingDateFrom}, bookingDateTo=${bookingDateTo}, status='Approved')}"
+                      th:selected="${status == 'Approved'}">Đã xác nhận</option>
+              <option th:value="@{/manage-booking(bookingDateFrom=${bookingDateFrom}, bookingDateTo=${bookingDateTo}, status='Completed')}"
+                      th:selected="${status == 'Completed'}">Đã hoàn thành</option>
+            </select>
+          </div>
+        </div>
+
+        <div th:if="${listOfPage.size() == 0}" style="text-align: center;">
+          <h3 style="color:red;">Không tìm thấy kết quả</h3>
+        </div>
+
+        <div class="row" style="margin-top:40px;" th:if="${listOfPage.size() > 0}">
+          <div class="container mtop" style="width:100%">
+            <table class="table table-striped table-bordered" id="sortTable">
+              <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Dịch vụ</th>
+                <th>Gía</th>
+                <th>Ngày khám</th>
+                <th>Khung giờ</th>
+                <th>Tên bệnh nhân</th>
+                <th>Số Điện Thoại</th>
+                <th>Note</th>
+                <th>Tình trạng</th>
+                <th>Hành động</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="c : ${listOfPage}">
+                <td>
+                  <a href="#"
+                     th:data-booking-id="${c.bookingId}"
+                     th:data-service-name="${c.service.serviceName}"
+                     th:data-service-price="${c.service.price}"
+                     th:data-appointment-date="${c.appointmentDate}"
+                     th:data-slot-time="${c.slot.startTime + ' - ' + c.slot.endTime}"
+                     th:data-patient-name="${c.patientName}"
+                     th:data-dob="${#dates.format(c.dob, 'yyyy-MM-dd')}"
+                     th:data-phone="${c.phoneNumber}"
+                     th:data-email="${c.email}"
+                     th:data-address="${c.address}"
+                     th:data-note="${c.note}"
+                     th:data-status="${c.status}"
+                     onclick="showBookingModal(this)"
+                     th:text="${c.bookingId}">
+                  </a>
+
+                </td>
+
+                <td th:text="${c.service.serviceName}"></td>
+                <td th:text="${c.service.price}"></td>
+                <td th:text="${c.appointmentDate}"></td>
+                <td th:text="${c.slot.startTime + ' - ' + c.slot.endTime}"></td>
+                <td th:text="${c.patientName}"></td>
+                <td th:text="${c.phoneNumber}"></td>
+                <td th:text="${c.note}"></td>
+                <td th:if="${c.status == 'Approved'}" style="color: blue;">Đã xác nhận</td>
+                <td th:if="${c.status == 'Pending'}">Chờ xác nhận</td>
+                <td th:if="${c.status == 'Completed'}">Đã hoàn thành</td>
+                <td th:if="${c.status == 'Processing'}">Đang khám</td>
+                <td>
+                  <div th:if="${c.status == 'Pending'}">
+                    <div class="row">
+                      <form th:action="@{/update-booking}" method="post" onsubmit="return confirm('Xác nhận lịch khám?')">
+                        <input type="hidden" name="bookingId" th:value="${c.bookingId}" />
+                        <input type="hidden" name="status" value="Approved" />
+                        <input type="hidden" name="typeSubmit" value="btn" />
+                        <button type="submit" class="btn btn-success btn-lg active" style="font-size: 12px">Xác nhận</button>
+                      </form>
+                    </div>
+                    <div class="row">
+                      <form th:action="@{/update-booking}" method="post" onsubmit="return confirm('Từ chối lịch khám?')">
+                        <input type="hidden" name="bookingId" th:value="${c.bookingId}" />
+                        <input type="hidden" name="status" value="Canceled" />
+                        <input type="hidden" name="typeSubmit" value="btn" />
+                        <button type="submit" class="btn btn-danger btn-lg active" style="font-size: 12px">Từ chối</button>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div th:if="${c.status == 'Processing'}">
+                    <form th:action="@{/update-booking}" method="post" onsubmit="return confirm('Xác nhận lịch khám đã kết thúc?')">
+                      <input type="hidden" name="bookingId" th:value="${c.bookingId}" />
+                      <input type="hidden" name="status" value="Completed" />
+                      <input type="hidden" name="typeSubmit" value="btn" />
+                      <button type="submit" class="btn btn-success btn-lg active" style="font-size: 12px">Hoàn thành</button>
+                    </form>
+                  </div>
+
+                  <div th:if="${c.status == 'Approved'}">
+                    <form th:action="@{/create-session}" method="get" >
+                      <input type="hidden" name="bookingId" th:value="${c.bookingId}" />
+                      <button type="submit" class="btn btn-primary btn-lg active" style="font-size: 12px">Tạo ca khám</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Detail Modal -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1" role="dialog" aria-labelledby="bookingDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookingDetailModalLabel">Chi tiết lịch khám</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="bookingForm" th:action="@{/update-booking}" method="post">
+        <input type="hidden" name="bookingId" id="bookingId">
+        <input type="hidden" name="status" id="statusField">
+      <div class="modal-body">
+        <button id="editBtn" class="btn btn-warning mb-3" onclick="enableEdit()">Chỉnh sửa</button>
+
+        <!-- Thông tin dịch vụ -->
+        <div class="border-bottom pb-3 mb-3">
+          <h6 class="font-weight-bold">Thông tin dịch vụ</h6>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Dịch vụ</label>
+              <input type="text" class="form-control" id="serviceName" readonly>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Giá</label>
+              <input type="text" class="form-control"  id="servicePrice" readonly>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Ngày khám</label>
+              <input type="date" class="form-control" id="appointmentDate" readonly>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Khung giờ</label>
+              <input type="text" class="form-control" id="slotTime" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thông tin khách hàng -->
+        <div>
+          <h6 class="font-weight-bold">Thông tin khách hàng</h6>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Tên bệnh nhân</label>
+              <input type="text" class="form-control" name="patientName" id="patientName" readonly required>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Ngày sinh</label>
+              <input type="date" class="form-control" name="dob" id="dob" readonly required>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Số điện thoại</label>
+              <input type="text" class="form-control" name="phoneNumber" id="phoneNumber" readonly required>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Email</label>
+              <input type="text" class="form-control" name="email" id="email" readonly required>
+            </div>
+            <div class="form-group col-md-12">
+              <label>Địa chỉ</label>
+              <input type="text" class="form-control" name="address" id="address" readonly required>
+            </div>
+            <div class="form-group col-md-12">
+              <label>Ghi chú</label>
+              <textarea class="form-control" id="note" name="note" rows="3" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="actionButtons">
+        <!-- Nút hành động sẽ được thêm bằng JS -->
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('#sortTable').DataTable({
+      "pageLength": 10,
+      "lengthChange": false, // ẩn dropdown chọn số bản ghi
+      "ordering": false,     // tắt sắp xếp nếu không cần
+      "searching": false,
+      "language": {
+        "search": "Tìm kiếm:",
+        "paginate": {
+          "previous": "Trước",
+          "next": "Sau"
+        },
+        "info": "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
+        "zeroRecords": "Không tìm thấy kết quả phù hợp",
+        "infoEmpty": "Không có bản ghi nào",
+      }
+    });
+  });
+</script>
+<script>
+  function showBookingModal(link) {
+  // Đổ dữ liệu vào các input
+  document.getElementById("bookingId").value = link.getAttribute("data-booking-id");
+  document.getElementById("patientName").value = link.getAttribute("data-patient-name");
+  document.getElementById("dob").value = link.getAttribute("data-dob");
+  document.getElementById("phoneNumber").value = link.getAttribute("data-phone");
+  document.getElementById("email").value = link.getAttribute("data-email");
+  document.getElementById("address").value = link.getAttribute("data-address");
+  document.getElementById("note").value = link.getAttribute("data-note");
+
+  document.getElementById("serviceName").value = link.getAttribute("data-service-name");
+  document.getElementById("servicePrice").value = link.getAttribute("data-service-price");
+  document.getElementById("appointmentDate").value = link.getAttribute("data-appointment-date");
+  document.getElementById("slotTime").value = link.getAttribute("data-slot-time");
+  const status = link.getAttribute("data-status");
+
+  // Render nút theo trạng thái
+  let actionHtml = '';
+  if (status !== "Completed") {
+  if (status === 'Pending') {
+    actionHtml += `
+      <button type="button" class="btn btn-success" onclick="submitFormWithStatus('Approved')">Xác nhận</button>
+      <button type="button" class="btn btn-danger" onclick="submitFormWithStatus('Canceled')">Từ chối</button>
+    `;
+  } else if (status === 'Approved') {
+    actionHtml += `
+      <button type="button" class="btn btn-success" onclick="submitFormWithStatus('Completed')">Hoàn thành</button>
+    `;
+  }
+
+  document.getElementById("actionButtons").innerHTML = actionHtml;
+}else{
+const footer = document.getElementById("actionButtons");
+    footer.innerHTML = '';
+}
+  // Hiển thị modal
+  $('#bookingDetailModal').modal('show');
+}
+
+function enableEdit() {
+  const editableFields = ['patientName', 'dob', 'phoneNumber', 'email', 'address', 'note'];
+  editableFields.forEach(id => document.getElementById(id).removeAttribute('readonly'));
+
+  const footer = document.getElementById("actionButtons");
+  footer.innerHTML = `
+    <button type="button" class="btn btn-success" onclick="submitFormWithStatus('Approved')">Lưu và xác nhận</button>
+    <button type="button" class="btn btn-danger" onclick="submitFormWithStatus('Canceled')">Từ chối lịch</button>
+  `;
+}
+
+function submitFormWithStatus(status) {
+  let confirmMsg = '';
+  switch (status) {
+    case 'Approved':
+      confirmMsg = 'Bạn có chắc muốn xác nhận lịch hẹn này?';
+      break;
+    case 'Canceled':
+      confirmMsg = 'Bạn có chắc muốn từ chối lịch hẹn này?';
+      break;
+    case 'Completed':
+      confirmMsg = 'Bạn có chắc muốn đánh dấu hoàn thành lịch hẹn này?';
+      break;
+    default:
+      confirmMsg = 'Bạn có chắc muốn thực hiện hành động này?';
+  }
+
+  if (confirm(confirmMsg)) {
+    document.getElementById("statusField").value = status;
+
+    const fields = ['patientName', 'dob', 'phoneNumber', 'email', 'address', 'note'];
+    const form = document.getElementById("bookingForm");
+
+    fields.forEach(field => {
+      const input = document.getElementById(field);
+      let hidden = form.querySelector(`input[name="${field}"]`);
+
+      if (!hidden) {
+        hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = field;
+        form.appendChild(hidden);
+      }
+
+      hidden.value = input.value;
+    });
+    form.submit();
+  }
+}
+
+</script>
+<script>
+  if (document.querySelector('.alert')) {
+      document.querySelectorAll('.alert').forEach(function ($el) {
+          setTimeout(() => {
+              $el.classList.remove('show');
+          }, 3000);
+      });
+  }
+</script>
+<script>
+  function validateDateRange() {
+    const from = document.getElementById('bookingDateFrom').value;
+    const to = document.getElementById('bookingDateTo').value;
+
+    if (from && to && from > to) {
+      alert("Ngày bắt đầu phải trước ngày kết thúc.");
+      return false; // Ngăn form submit
+    }
+    return true;
+  }
+</script>
+
+</body>
+</html>

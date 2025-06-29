@@ -23,6 +23,6 @@ public class Image {
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ServiceImage> serviceImages = new ArrayList<>();
 }

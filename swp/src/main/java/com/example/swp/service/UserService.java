@@ -12,6 +12,6 @@ public interface UserService {
     List<User> findAll();
     public long getTotalUsers();
     User findByUserId(int userId);
-
     String createPasswordResetToken(User user);
+    List<User> findByRoleId(Integer roleId);
 }
